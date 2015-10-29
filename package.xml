@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <name>erica</name>
+  <version>0.1.0</version>
+  <description>
+     service robot erica main system.
+  </description>
+  <maintainer email="hoopy@ekpyroticfrood.net">Hoopy Frood</maintainer>
+  <license>BSD</license>
+  <author email="hoopy@ekpyroticfrood.net">Hoopy Frood</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>rospy</build_depend>
+  <build_depend>serial</build_depend>
+  <build_depend>cStringIO</build_depend>
+
+</package>

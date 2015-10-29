@@ -1,0 +1,9 @@
+
+<launch>
+  <!-- Turtlebot Driver -->
+  <node pkg="erica" type="main.py" name="erica_system" respawn="true" args="--respawnable" />
+  <node pkg="erica" type="erica_node.py" name="erica_node" respawn="true" args="--respawnable" />
+  <node pkg="tts_ekho" type="tts_ekho_node" name="tts_ekho_node" respawn="true" args="--respawnable" />
+
+
+</launch>
