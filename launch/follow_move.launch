@@ -1,0 +1,10 @@
+
+<launch>
+  <!-- follow your move -->
+  <!-- <node pkg="erica" type="main.py" name="erica_system" respawn="true" />
+  -->
+  <node pkg="erica" type="erica_node.py" name="erica_node" respawn="true" args="--respawnable" />
+  <node pkg="skeleton_tracker" type="user_viewer" name="user_viewer" output="screen"/>
+  <!-- <include file="$(find zbar_ros)/launch/detector_camera.launch" /> -->
+
+</launch>

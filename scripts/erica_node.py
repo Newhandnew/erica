@@ -25,6 +25,7 @@ import rospy
 import time
 import subprocess
 import os
+import struct
 
 from std_msgs.msg import String
 
@@ -77,17 +78,45 @@ class erica_node(object):
     # handle erica command 
     def _handle_erica_command(self, cmd):
         print cmd
-        if (cmd.data == "a"):
-            self._write_serial('a');
-        elif (cmd.data == "b"):
-            self._write_serial('b');
-        elif (cmd.data == "c"):
-            self._write_serial('c');
-        elif (cmd.data == "d"):
-            self._write_serial('d');
-        elif (cmd.data == "e"):
-            self._write_serial('e');
+        # inter communicate type : length.type1.type2.angle1(parameter).angle2.angle3.angle4.angle5 
+        cmdData = map(int, cmd.data.split(".")) # chnage string to integer
+        # barcode format must meet 4 column
+        # set time interval to 3 seconds
+        output = []
+        output.append(0xc9) # start byte
+        if(cmdData[0] == 7):
+            output.append(12)       # add 5 byte for high byte and low byte
+        else:
+            output.append(cmdData[0])   # length
+        output.append(cmdData[1])    # type1 (Gesture, Angle of motor, Macro, Config arm speed, Config hand speed)
+        output.append(cmdData[2])    # type2 (left, right, both)
+        if(cmdData[0] == 3):        # seperate into 2 form, 1 parameter and 5 parameters
+            output.append(int(cmdData[3]))
+        elif(cmdData[0] == 7):
+            output.append(cmdData[3] / 200)
+            output.append(cmdData[3] % 200)
+            output.append(cmdData[4] / 200)
+            output.append(cmdData[4] % 200)
+            output.append(cmdData[5] / 200)
+            output.append(cmdData[5] % 200)
+            output.append(cmdData[6] / 200)
+            output.append(cmdData[6] % 200)
+            output.append(cmdData[7] / 200)
+            output.append(cmdData[7] % 200)
 
+        check_sum = 0
+        for num in range(2, output[1] + 2):    # check sum from type1 to length + (type1 tpye2)
+            check_sum ^= output[num]
+
+        output.append(check_sum)
+        output.append(0xca) # end byte
+
+        print output
+        
+        string = ''
+        for i in output:
+            string += struct.pack('!B',i)
+        self._write_serial(string) 
 
 
     def _reset_serial_connection(self):
@@ -105,7 +134,7 @@ class erica_node(object):
         self._InfraredPublisher.publish(infrared_scan)
 
     def _write_serial(self, message):
-        self._SerialPublisher.publish(String(str(self._Counter) + ", out: " + message))
+        # self._SerialPublisher.publish(String(str(self._Counter) + ", out: " + message))
         self.nfcReceiver.Write(message)
 
     def start(self):

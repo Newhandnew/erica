@@ -70,7 +70,7 @@ class SerialDataGateway(object):
     def Write(self, data):
         #AttributeError: 'SerialDataGateway' object has no attribute '_Serial'
         try:
-            print("serial write : " + data)
+            # print("serial write : " + data)
             self._Serial.write(data)
         except AttributeError:
             rospy.loginfo("SERIAL PORT Write Error")
