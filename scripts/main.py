@@ -19,12 +19,19 @@ class mainSystem(object):
 		rospy.loginfo("get barcode %d and %d : " + data.data, self.startTime, time.time())
 		self.dataInput = data.data.split(",")
 		# barcode format must meet 4 column
-		# set time interval to 3 seconds
+		# set time interval to 5 seconds
 		if (len(self.dataInput) == 4):
-			if ((time.time() - self.startTime) > 3):
-				self.startTime = time.time();
+			if ((time.time() - self.startTime) > 5):
+				self.startTime = time.time()
 				self.ttsPublisher.publish(String(str(self.dataInput[2])))
-				self.ericaCmdPublisher.publish(String(str(self.dataInput[3])))
+				if (self.dataInput[3] == 'a'):
+					self.ericaCmdPublisher.publish(String("3.3.0.2"))
+				elif (self.dataInput[3] == 'b')
+					self.ericaCmdPublisher.publish(String("3.3.0.3"))
+				elif (self.dataInput[3] == 'c')
+					self.ericaCmdPublisher.publish(String("3.3.0.4"))
+				elif (self.dataInput[3] == 'd')
+					self.ericaCmdPublisher.publish(String("3.3.0.5"))
 
 if __name__ == '__main__':
 

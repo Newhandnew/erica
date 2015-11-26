@@ -49,13 +49,13 @@ class erica_node(object):
         rospy.Subscriber("cmd_erica", String, self._handle_erica_command)  # Is this line or the below bad redundancy?
 
         # # Publishers
-        self._SerialPublisher = rospy.Publisher('serial', String, queue_size=10)
+        self._SerialPublisher = rospy.Publisher('serialReceive', String, queue_size=10)
 
         port = rospy.get_param("~port", "/dev/ttyACM0")
         baud_rate = int(rospy.get_param("~baudRate", 115200))
 
         rospy.loginfo("Starting with serial port: " + port + ", baud rate: " + str(baud_rate))
-        self.nfcReceiver = SerialDataGateway(port, baud_rate, self._handle_received_line)
+        self.ericaSerial = SerialDataGateway(port, baud_rate, self._handle_received_line)
 
 
     def _handle_received_line(self, line):  # This is Propeller specific
@@ -66,14 +66,12 @@ class erica_node(object):
         self._Counter += 1
 
         print line
-        self._SerialPublisher.publish(String(str(self._Counter) + ", in:  " + line))
+        # self._SerialPublisher.publish(String(str(self._Counter) + ", in:  " + line))
 
         if len(line) > 0:
             line_parts = line.split('\t')
-            # We should broadcast the odometry no matter what. Even if the motors are off, or location is useful!
-            if line_parts == "trigger":
-                self._write_serial('a');
-                return
+            self._SerialPublisher.publish(String(line_parts))
+
 
     # handle erica command 
     def _handle_erica_command(self, cmd):
@@ -84,6 +82,7 @@ class erica_node(object):
         # set time interval to 3 seconds
         output = []
         output.append(0xc9) # start byte
+        # length = type1 + type2 + parameter
         if(cmdData[0] == 7):
             output.append(12)       # add 5 byte for high byte and low byte
         else:
@@ -122,7 +121,7 @@ class erica_node(object):
     def _reset_serial_connection(self):
         rospy.loginfo("Serial Data Gateway stopping . . .")
         try:
-            self.nfcReceiver.Stop()
+            self.ericaSerial.Stop()
         except AttributeError:
             rospy.loginfo("Attempt to start nonexistent Serial device.")
         rospy.loginfo("Serial Data Gateway stopped.")
@@ -131,11 +130,11 @@ class erica_node(object):
         self.startSerialPort()
 
 
-        self._InfraredPublisher.publish(infrared_scan)
+        # self._InfraredPublisher.publish(infrared_scan)
 
     def _write_serial(self, message):
         # self._SerialPublisher.publish(String(str(self._Counter) + ", out: " + message))
-        self.nfcReceiver.Write(message)
+        self.ericaSerial.Write(message)
 
     def start(self):
         self.startSerialPort()
@@ -143,7 +142,7 @@ class erica_node(object):
     def startSerialPort(self):
         rospy.loginfo("Serial Data Gateway starting . . .")
         try:
-            self.nfcReceiver.Start()
+            self.ericaSerial.Start()
         except:
             rospy.loginfo("SERIAL PORT Start Error")
             reset_usb_script = os.path.expanduser("~/metatron/scripts/callRestUSB.sh")
@@ -167,12 +166,12 @@ class erica_node(object):
         """
         rospy.loginfo("Stopping")
         self._serialAvailable = False
-        rospy.loginfo("nfcReceiver stopping . . .")
+        rospy.loginfo("ericaSerial stopping . . .")
         try:
-            self.nfcReceiver.Stop()
+            self.ericaSerial.Stop()
         except AttributeError:
             rospy.loginfo("Attempt to start nonexistent Serial device.")
-        rospy.loginfo("nfcReceiver stopped.")
+        rospy.loginfo("ericaSerial stopped.")
 
  
 
