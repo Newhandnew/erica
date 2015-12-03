@@ -40,8 +40,6 @@ class erica_node(object):
     def __init__(self):
         rospy.init_node('erica_node')
 
-        self._Counter = 0
-
         self._serialAvailable = False
         self._serialTimeout = 0
 
@@ -63,14 +61,13 @@ class erica_node(object):
         This will run every time a line is received over the serial port (USB)
         from the Propeller board and will send the data to the correct function.
         """
-        self._Counter += 1
-
         print line
         # self._SerialPublisher.publish(String(str(self._Counter) + ", in:  " + line))
-
-        if len(line) > 0:
-            line_parts = line.split('\t')
-            self._SerialPublisher.publish(String(line_parts))
+        # self._SerialPublisher.publish(String("this is a test"))
+        rospy.loginfo("length: %d, get: " + line, len(line))
+        if (len(line) > 0):
+            rospy.loginfo("get:" + line)
+            self._SerialPublisher.publish(String(line))
 
 
     # handle erica command 
